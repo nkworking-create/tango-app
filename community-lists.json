@@ -1,0 +1,30 @@
+[
+  {
+    "id": "cl-1774280978360",
+    "userId": "u-xbibqqih4",
+    "name": "toeic",
+    "words": [
+      {
+        "en": "run",
+        "ja": "走る・経営する・流れる・続く・作動する・立候補する",
+        "pronunciation": "/rʌn/"
+      }
+    ],
+    "count": 3,
+    "updatedAt": 1774281218747
+  },
+  {
+    "id": "cl-1774674295820",
+    "userId": "u-voyrtccee",
+    "name": "TOEIC",
+    "words": [
+      {
+        "en": "profound",
+        "ja": "深い・深遠な・重大な・深刻な・心からの・奥深い",
+        "pronunciation": ""
+      }
+    ],
+    "count": 0,
+    "updatedAt": 1774674295820
+  }
+]

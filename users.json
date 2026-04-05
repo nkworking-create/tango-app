@@ -1,0 +1,16 @@
+[
+  {
+    "id": "u-60e7949441e1773d",
+    "name": "test",
+    "email": "test@test.com",
+    "passwordHash": "0a740d3fd8b68d62ba229ca2d1e7080c4e32fbc8a0b8829bf44ca1f24dbee62e",
+    "createdAt": 1774675247730
+  },
+  {
+    "id": "u-30ded4d2fca3b512",
+    "name": "テストユーザー",
+    "email": "demo@tango.app",
+    "passwordHash": "1972a01eb9447a04276d486d6f8457f71ccc8fa71d9b65f72f8ed110f81350cb",
+    "createdAt": 1774675466958
+  }
+]

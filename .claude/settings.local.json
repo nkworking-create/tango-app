@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -si http://localhost:3333/)",
+      "Bash(node -e \"const path=require\\(''path''\\); console.log\\(__dirname, process.cwd\\(\\)\\)\")",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

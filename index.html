@@ -651,8 +651,8 @@
     @keyframes ring-pulse { 0%,100%{filter:drop-shadow(0 0 6px #fbbf24aa)} 50%{filter:drop-shadow(0 0 18px #fbbf24ff)} }
     .cq-done-btn { width:100%; padding:14px; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font); }
     /* ── STATS SWIPE ── */
-    #mode-stats { display:none; flex-direction:column; height:100%; padding-bottom:calc(var(--nav-height) + var(--safe-bottom)); overflow:hidden; background:var(--bg); }
-    .stats-swipe-rail { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; padding:8px 4vw 10px; scrollbar-width:none; flex:1; min-height:0; -webkit-overflow-scrolling:touch; align-items:stretch; }
+    #mode-stats { display:none; flex-direction:column; height:100%; overflow:hidden; background:var(--bg); }
+    .stats-swipe-rail { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; padding:8px 4vw calc(var(--nav-height) + var(--safe-bottom) + 8px); scrollbar-width:none; flex:1; min-height:0; -webkit-overflow-scrolling:touch; align-items:stretch; }
     .stats-swipe-rail::-webkit-scrollbar { display:none; }
     /* カード */
     .stats-period-card { flex:0 0 92vw; scroll-snap-align:center; border-radius:28px; display:flex; flex-direction:column; overflow:hidden; transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .28s; position:relative; background:#09001a; -webkit-font-smoothing:antialiased; }
@@ -869,12 +869,7 @@
   <!-- STATS -->
   <div id="mode-stats" style="display:none">
     <div class="stats-swipe-rail" id="stats-rail"></div>
-    <div class="stats-dots" id="stats-dots">
-      <span class="stats-dot active"></span>
-      <span class="stats-dot"></span>
-      <span class="stats-dot"></span>
-      <span class="stats-dot"></span>
-    </div>
+    <div class="stats-dots" id="stats-dots" style="display:none"></div>
   </div>
 
   <!-- SETTINGS -->
@@ -4475,19 +4470,23 @@ function renderStats() {
         <div class="spc-btm-cell"><div class="spc-btm-val">${totalCorrect}</div><div class="spc-btm-lbl">Quiz Correct</div></div>
         <div class="spc-btm-cell"><div class="spc-btm-val">${unknownIds.size}</div><div class="spc-btm-lbl">要復習</div></div>
       </div>
+      <div class="stats-dots" id="stats-dots-${i}" style="padding:10px 0 14px">
+        ${[0,1,2,3].map(j=>`<span class="stats-dot${i===j?' active':''}"></span>`).join('')}
+      </div>
     </div>`;
   }).join('');
 
   // スクロール連動
   setTimeout(()=>{
-    const dots = document.querySelectorAll('.stats-dot');
     const cards = rail.querySelectorAll('.stats-period-card');
     rail.addEventListener('scroll',()=>{
       const center = rail.scrollLeft + rail.offsetWidth/2;
       let closest=0,minD=Infinity;
       cards.forEach((c,i)=>{ const dist=Math.abs(c.offsetLeft+c.offsetWidth/2-center); if(dist<minD){minD=dist;closest=i;} });
-      dots.forEach((d,i)=>d.classList.toggle('active',i===closest));
-      cards.forEach((c,i)=>c.classList.toggle('active',i===closest));
+      cards.forEach((c,i)=>{
+        c.classList.toggle('active',i===closest);
+        c.querySelectorAll('.stats-dot').forEach((d,j)=>d.classList.toggle('active',j===closest));
+      });
     },{passive:true});
   },30);
 }

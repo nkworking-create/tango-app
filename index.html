@@ -651,25 +651,25 @@
     .cq-done-btn { width:100%; padding:14px; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font); }
     /* ── STATS SWIPE ── */
     #mode-stats { display:none; flex-direction:column; height:100%; padding-bottom:calc(var(--nav-height) + var(--safe-bottom)); overflow:hidden; background:var(--bg); }
-    .stats-swipe-rail { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:14px; padding:10px 5vw 12px; scrollbar-width:none; flex:1; min-height:0; -webkit-overflow-scrolling:touch; align-items:center; }
+    .stats-swipe-rail { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; padding:8px 4vw 10px; scrollbar-width:none; flex:1; min-height:0; -webkit-overflow-scrolling:touch; align-items:center; }
     .stats-swipe-rail::-webkit-scrollbar { display:none; }
     /* カード */
-    .stats-period-card { flex:0 0 88vw; height:100%; scroll-snap-align:center; border-radius:32px; display:flex; flex-direction:column; overflow:hidden; transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .28s; position:relative; background:#09001a; }
-    .stats-period-card.active { transform:scale(1.025) translateY(-5px); }
-    .stats-period-card:not(.active) { opacity:.15; transform:scale(.9) translateY(10px); }
+    .stats-period-card { flex:0 0 92vw; height:100%; scroll-snap-align:center; border-radius:28px; display:flex; flex-direction:column; overflow:hidden; transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .28s; position:relative; background:#09001a; -webkit-font-smoothing:antialiased; }
+    .stats-period-card.active { transform:scale(1.02) translateY(-4px); }
+    .stats-period-card:not(.active) { opacity:.12; transform:scale(.88) translateY(8px); }
     /* ── ヒーローゾーン ── */
     .spc-top { flex:0 0 auto; padding:26px 24px 0; position:relative; }
-    .spc-eyebrow { font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:rgba(192,132,252,.55); margin-bottom:6px; }
+    .spc-eyebrow { font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:rgba(192,132,252,.65); margin-bottom:8px; }
     .spc-big { display:flex; align-items:flex-end; gap:4px; line-height:1; }
-    .spc-big-num { font-size:80px; font-weight:900; letter-spacing:-.05em; color:#fff; font-variant-numeric:tabular-nums; }
-    .spc-big-unit { font-size:26px; font-weight:700; color:rgba(255,255,255,.38); margin-bottom:10px; }
+    .spc-big-num { font-size:88px; font-weight:900; letter-spacing:-.05em; color:#fff; font-variant-numeric:tabular-nums; }
+    .spc-big-unit { font-size:28px; font-weight:700; color:rgba(255,255,255,.38); margin-bottom:12px; }
     .spc-accent-line { height:2px; width:48px; background:linear-gradient(90deg,#a855f7,transparent); border-radius:99px; margin-top:10px; }
     /* ── 3列サブstat ── */
     .spc-sub { display:flex; margin:0 24px; border-top:1px solid rgba(255,255,255,.07); }
     .spc-sub-cell { flex:1; padding:12px 0; display:flex; flex-direction:column; gap:3px; }
     .spc-sub-cell + .spc-sub-cell { border-left:1px solid rgba(255,255,255,.07); padding-left:14px; }
-    .spc-sub-val { font-size:18px; font-weight:900; color:#fff; letter-spacing:-.02em; line-height:1; }
-    .spc-sub-lbl { font-size:9px; font-weight:700; color:rgba(192,132,252,.45); letter-spacing:.07em; text-transform:uppercase; }
+    .spc-sub-val { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.02em; line-height:1; }
+    .spc-sub-lbl { font-size:10px; font-weight:700; color:rgba(192,132,252,.55); letter-spacing:.07em; text-transform:uppercase; }
     /* ── チャートゾーン ── */
     .spc-chart-zone { flex:1; display:flex; flex-direction:column; padding:10px 20px 0; gap:8px; min-height:0; }
     .spc-toggle-row { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -696,8 +696,8 @@
     .spc-btm-cell { padding:13px 20px; display:flex; flex-direction:column; gap:3px; position:relative; }
     .spc-btm-cell:nth-child(1),.spc-btm-cell:nth-child(2) { border-bottom:1px solid rgba(255,255,255,.06); }
     .spc-btm-cell:nth-child(odd) { border-right:1px solid rgba(255,255,255,.06); }
-    .spc-btm-val { font-size:24px; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1; }
-    .spc-btm-lbl { font-size:9px; font-weight:700; color:rgba(192,132,252,.4); letter-spacing:.07em; text-transform:uppercase; margin-top:2px; }
+    .spc-btm-val { font-size:26px; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1; }
+    .spc-btm-lbl { font-size:10px; font-weight:700; color:rgba(192,132,252,.5); letter-spacing:.07em; text-transform:uppercase; margin-top:3px; }
     /* dots */
     .stats-dots { display:flex; gap:6px; align-items:center; justify-content:center; padding:4px 0 10px; flex-shrink:0; }
     .stats-dot { width:5px; height:5px; border-radius:99px; background:var(--border); transition:all .3s; }
@@ -4323,46 +4323,68 @@ function _buildSpcChart(map, period, metric) {
 
   const maxV = Math.max(1, ...cols.filter(c=>!c.future).map(c=>c.v));
   const n = cols.length;
-  // SVG座標系: ラベルはHTMLで描画するのでpBを最小に
-  const W=100, H=44, pL=2, pR=2, pT=4, pB=2;
+  const W=100, H=48, pL=3, pR=3, pT=5, pB=3;
   const pw=W-pL-pR, ph=H-pT-pB;
   const xOf = i => pL + (n<=1 ? pw/2 : i/(n-1)*pw);
   const yOf = v => pT + ph - Math.min(1, Math.max(0, v/maxV)) * ph;
 
-  const pts = cols.map((c,i) => `${xOf(i).toFixed(1)},${(c.future?yOf(0):yOf(c.v)).toFixed(1)}`).join(' ');
-  const yBot = (pT+ph).toFixed(1);
-  const areaD = `M${xOf(0).toFixed(1)},${yBot} ${cols.map((c,i)=>`L${xOf(i).toFixed(1)},${(c.future?yOf(0):yOf(c.v)).toFixed(1)}`).join(' ')} L${xOf(n-1).toFixed(1)},${yBot}Z`;
+  const pts = cols.map((c,i) => ({x:xOf(i), y:c.future?yOf(0):yOf(c.v)}));
+
+  // ベジェ曲線で滑らかなライン
+  function bezierPath(ps) {
+    if(ps.length<2) return `M${ps[0].x},${ps[0].y}`;
+    const t=0.22;
+    let d=`M${ps[0].x.toFixed(2)},${ps[0].y.toFixed(2)}`;
+    for(let i=0;i<ps.length-1;i++){
+      const p0=ps[Math.max(0,i-1)], p1=ps[i], p2=ps[i+1], p3=ps[Math.min(ps.length-1,i+2)];
+      const cp1x=p1.x+(p2.x-p0.x)*t, cp1y=p1.y+(p2.y-p0.y)*t;
+      const cp2x=p2.x-(p3.x-p1.x)*t, cp2y=p2.y-(p3.y-p1.y)*t;
+      d+=` C${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+    }
+    return d;
+  }
+
+  const yBot = (pT+ph).toFixed(2);
+  const linePath = bezierPath(pts);
+  const areaD = `${linePath} L${pts[n-1].x.toFixed(2)},${yBot} L${pts[0].x.toFixed(2)},${yBot}Z`;
 
   const lc = isTime ? '#10b981' : '#8b5cf6';
   const gc = isTime ? '#34d399' : '#a78bfa';
   const gid = `glc${period[0]}${metric[0]}`;
 
+  // グリッドライン
+  const gridSvg = [0.25,0.5,0.75].map(r=>{
+    const y=(pT+ph*(1-r)).toFixed(2);
+    return `<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>`;
+  }).join('');
+
   const dotsSvg = cols.map((c,i)=>{
     if(c.future) return '';
-    const cx=xOf(i).toFixed(1), cy=yOf(c.v).toFixed(1);
-    if(c.hi) return `<circle cx="${cx}" cy="${cy}" r="2.4" fill="${lc}" stroke="#09001a" stroke-width="1.2"/>`;
-    if(c.v>0) return `<circle cx="${cx}" cy="${cy}" r="1.1" fill="${gc}" opacity="0.65"/>`;
+    const cx=pts[i].x.toFixed(2), cy=pts[i].y.toFixed(2);
+    if(c.hi) return `<circle cx="${cx}" cy="${cy}" r="3" fill="${lc}" stroke="#09001a" stroke-width="1.5"/><circle cx="${cx}" cy="${cy}" r="1.5" fill="#fff" opacity="0.9"/>`;
+    if(c.v>0) return `<circle cx="${cx}" cy="${cy}" r="1.4" fill="${gc}" opacity="0.7"/>`;
     return '';
   }).join('');
 
-  // ラベルはHTMLで描画（SVGのpreserveAspectRatio:noneによる文字潰れを防ぐ）
   const labelsHtml = cols.map((c,i)=>c.label
-    ? `<span style="position:absolute;left:${(xOf(i)/W*100).toFixed(1)}%;transform:translateX(-50%);font-size:9px;font-weight:700;color:rgba(192,132,252,0.55);white-space:nowrap;font-family:var(--font)">${c.label}</span>`
+    ? `<span style="position:absolute;left:${(xOf(i)/W*100).toFixed(1)}%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(192,132,252,0.65);white-space:nowrap;font-family:var(--font);-webkit-font-smoothing:antialiased">${c.label}</span>`
     : '').join('');
 
-  return `<div style="display:flex;flex-direction:column;height:100%;min-height:80px">
+  return `<div style="display:flex;flex-direction:column;height:100%;min-height:90px">
   <div style="flex:1;min-height:0">
     <svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" style="display:block" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${gc}" stop-opacity="0.4"/>
+      <stop offset="0%" stop-color="${gc}" stop-opacity="0.45"/>
+      <stop offset="85%" stop-color="${gc}" stop-opacity="0.05"/>
       <stop offset="100%" stop-color="${gc}" stop-opacity="0"/>
     </linearGradient></defs>
+    ${gridSvg}
     <path d="${areaD}" fill="url(#${gid})"/>
-    <polyline points="${pts}" fill="none" stroke="${lc}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${linePath}" fill="none" stroke="${lc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     ${dotsSvg}
     </svg>
   </div>
-  <div style="height:18px;position:relative;flex-shrink:0">${labelsHtml}</div>
+  <div style="height:20px;position:relative;flex-shrink:0">${labelsHtml}</div>
 </div>`;
 }
 

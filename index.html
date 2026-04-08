@@ -678,7 +678,7 @@
     .spc-ct-btn { padding:3px 12px; border-radius:99px; border:none; background:transparent; color:rgba(255,255,255,.35); font-size:10px; font-weight:700; cursor:pointer; font-family:var(--font); transition:all .18s; }
     .spc-ct-btn.active { background:rgba(168,85,247,.5); color:#f3e8ff; box-shadow:0 2px 8px rgba(124,58,237,.4); }
     /* チャート本体 */
-    .spc-chart-outer { overflow-x:auto; scrollbar-width:none; height:120px; position:relative; }
+    .spc-chart-outer { overflow-x:hidden; scrollbar-width:none; width:100%; }
     .spc-chart-outer::-webkit-scrollbar { display:none; }
     .spc-chart-grid { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; padding-bottom:18px; }
     .spc-grid-line { width:100%; height:1px; background:rgba(255,255,255,.04); }
@@ -4371,7 +4371,7 @@ function _buildSpcChart(map, period, metric) {
     : '').join('');
 
   return `<div style="width:100%">
-    <svg viewBox="0 0 ${W} ${H}" width="100%" height="110" style="display:block" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;aspect-ratio:${W}/${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${gc}" stop-opacity="0.45"/>
       <stop offset="85%" stop-color="${gc}" stop-opacity="0.05"/>

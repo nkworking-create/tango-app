@@ -655,7 +655,7 @@
     .stats-swipe-rail { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; padding:8px 4vw calc(var(--nav-height) + var(--safe-bottom) + 8px); scrollbar-width:none; flex:1; min-height:0; -webkit-overflow-scrolling:touch; align-items:stretch; }
     .stats-swipe-rail::-webkit-scrollbar { display:none; }
     /* カード */
-    .stats-period-card { flex:0 0 92vw; scroll-snap-align:center; border-radius:28px; display:flex; flex-direction:column; overflow:hidden; transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .28s; position:relative; background:#09001a; -webkit-font-smoothing:antialiased; }
+    .stats-period-card { flex:0 0 92vw; scroll-snap-align:center; border-radius:28px; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .28s; position:relative; background:#09001a; -webkit-font-smoothing:antialiased; -webkit-overflow-scrolling:touch; }
     .stats-period-card.active { transform:scale(1.01); }
     .stats-period-card:not(.active) { opacity:.12; transform:scale(.88); }
     /* ── ヒーローゾーン ── */
@@ -672,14 +672,14 @@
     .spc-sub-val { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.02em; line-height:1; }
     .spc-sub-lbl { font-size:10px; font-weight:700; color:rgba(192,132,252,.55); letter-spacing:.07em; text-transform:uppercase; }
     /* ── チャートゾーン ── */
-    .spc-chart-zone { flex:1; display:flex; flex-direction:column; padding:10px 20px 16px; gap:8px; min-height:0; }
+    .spc-chart-zone { display:flex; flex-direction:column; padding:10px 20px 16px; gap:8px; }
     .spc-toggle-row { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
     .spc-toggle-label { font-size:10px; font-weight:800; color:rgba(192,132,252,.5); letter-spacing:.08em; text-transform:uppercase; }
     .spc-toggle-pills { display:flex; gap:4px; background:rgba(255,255,255,.05); border-radius:99px; padding:3px; }
     .spc-ct-btn { padding:3px 12px; border-radius:99px; border:none; background:transparent; color:rgba(255,255,255,.35); font-size:10px; font-weight:700; cursor:pointer; font-family:var(--font); transition:all .18s; }
     .spc-ct-btn.active { background:rgba(168,85,247,.5); color:#f3e8ff; box-shadow:0 2px 8px rgba(124,58,237,.4); }
     /* チャート本体 */
-    .spc-chart-outer { overflow-x:hidden; scrollbar-width:none; width:100%; flex:1; min-height:120px; }
+    .spc-chart-outer { overflow-x:hidden; scrollbar-width:none; width:100%; height:180px; }
     .spc-chart-outer::-webkit-scrollbar { display:none; }
     .spc-chart-grid { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; padding-bottom:18px; }
     .spc-grid-line { width:100%; height:1px; background:rgba(255,255,255,.04); }
@@ -4369,8 +4369,8 @@ function _buildSpcChart(map, period, metric) {
     ? `<span style="position:absolute;left:${(xOf(i)/W*100).toFixed(1)}%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(192,132,252,0.65);white-space:nowrap;font-family:var(--font);-webkit-font-smoothing:antialiased">${c.label}</span>`
     : '').join('');
 
-  return `<div style="width:100%;height:100%;display:flex;flex-direction:column">
-  <div style="flex:1;min-height:80px;position:relative">
+  return `<div style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box">
+  <div style="flex:1;position:relative">
     <svg viewBox="0 0 ${W} ${H}" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${gc}" stop-opacity="0.45"/>

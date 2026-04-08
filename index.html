@@ -4347,21 +4347,27 @@ function _buildSpcChart(map, period, metric) {
   const linePath = bezierPath(pts);
   const areaD = `${linePath} L${pts[n-1].x.toFixed(2)},${yBot} L${pts[0].x.toFixed(2)},${yBot}Z`;
 
-  const lc = isTime ? '#10b981' : '#8b5cf6';
-  const gc = isTime ? '#34d399' : '#a78bfa';
+  const lc  = isTime ? '#10b981' : '#8b5cf6';
+  const lc2 = isTime ? '#34d399' : '#c084fc';
+  const gc  = isTime ? '#34d399' : '#a78bfa';
   const gid = `glc${period[0]}${metric[0]}`;
+  const fid = `glow${period[0]}${metric[0]}`;
+  const lid = `line${period[0]}${metric[0]}`;
 
   // グリッドライン
   const gridSvg = [0.25,0.5,0.75].map(r=>{
     const y=(pT+ph*(1-r)).toFixed(2);
-    return `<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>`;
+    return `<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="0.4" stroke-dasharray="1.5 2"/>`;
   }).join('');
 
   const dotsSvg = cols.map((c,i)=>{
     if(c.future) return '';
     const cx=pts[i].x.toFixed(2), cy=pts[i].y.toFixed(2);
-    if(c.hi) return `<circle cx="${cx}" cy="${cy}" r="3" fill="${lc}" stroke="#09001a" stroke-width="1.5"/><circle cx="${cx}" cy="${cy}" r="1.5" fill="#fff" opacity="0.9"/>`;
-    if(c.v>0) return `<circle cx="${cx}" cy="${cy}" r="1.4" fill="${gc}" opacity="0.7"/>`;
+    if(c.hi) return `
+      <circle cx="${cx}" cy="${cy}" r="5.5" fill="${lc}" opacity="0.18"/>
+      <circle cx="${cx}" cy="${cy}" r="3.2" fill="${lc}" filter="url(#${fid})"/>
+      <circle cx="${cx}" cy="${cy}" r="1.6" fill="#fff"/>`;
+    if(c.v>0) return `<circle cx="${cx}" cy="${cy}" r="1.6" fill="${lc2}" opacity="0.75"/>`;
     return '';
   }).join('');
 
@@ -4372,14 +4378,26 @@ function _buildSpcChart(map, period, metric) {
   return `<div style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box">
   <div style="flex:1;position:relative">
     <svg viewBox="0 0 ${W} ${H}" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${gc}" stop-opacity="0.45"/>
-      <stop offset="85%" stop-color="${gc}" stop-opacity="0.05"/>
-      <stop offset="100%" stop-color="${gc}" stop-opacity="0"/>
-    </linearGradient></defs>
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${gc}" stop-opacity="0.5"/>
+        <stop offset="70%" stop-color="${gc}" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="${gc}" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="${lid}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="${lc}" stop-opacity="0.6"/>
+        <stop offset="50%" stop-color="${lc2}"/>
+        <stop offset="100%" stop-color="${lc}" stop-opacity="0.6"/>
+      </linearGradient>
+      <filter id="${fid}" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="1.8" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
     ${gridSvg}
     <path d="${areaD}" fill="url(#${gid})"/>
-    <path d="${linePath}" fill="none" stroke="${lc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${linePath}" fill="none" stroke="url(#${lid})" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${linePath}" fill="none" stroke="${lc2}" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
     ${dotsSvg}
     </svg>
   </div>

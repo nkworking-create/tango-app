@@ -678,7 +678,7 @@
     .spc-ct-btn { padding:3px 12px; border-radius:99px; border:none; background:transparent; color:rgba(255,255,255,.35); font-size:10px; font-weight:700; cursor:pointer; font-family:var(--font); transition:all .18s; }
     .spc-ct-btn.active { background:rgba(168,85,247,.5); color:#f3e8ff; box-shadow:0 2px 8px rgba(124,58,237,.4); }
     /* チャート本体 */
-    .spc-chart-outer { flex:1; overflow-x:auto; scrollbar-width:none; min-height:0; position:relative; }
+    .spc-chart-outer { overflow-x:auto; scrollbar-width:none; height:120px; position:relative; }
     .spc-chart-outer::-webkit-scrollbar { display:none; }
     .spc-chart-grid { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; padding-bottom:18px; }
     .spc-grid-line { width:100%; height:1px; background:rgba(255,255,255,.04); }
@@ -4370,9 +4370,8 @@ function _buildSpcChart(map, period, metric) {
     ? `<span style="position:absolute;left:${(xOf(i)/W*100).toFixed(1)}%;transform:translateX(-50%);font-size:11px;font-weight:700;color:rgba(192,132,252,0.65);white-space:nowrap;font-family:var(--font);-webkit-font-smoothing:antialiased">${c.label}</span>`
     : '').join('');
 
-  return `<div style="display:flex;flex-direction:column;height:100%;min-height:90px">
-  <div style="flex:1;min-height:0">
-    <svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" style="display:block" xmlns="http://www.w3.org/2000/svg">
+  return `<div style="width:100%">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${gc}" stop-opacity="0.45"/>
       <stop offset="85%" stop-color="${gc}" stop-opacity="0.05"/>
@@ -4383,8 +4382,7 @@ function _buildSpcChart(map, period, metric) {
     <path d="${linePath}" fill="none" stroke="${lc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     ${dotsSvg}
     </svg>
-  </div>
-  <div style="height:20px;position:relative;flex-shrink:0">${labelsHtml}</div>
+  <div style="height:20px;position:relative;margin-top:2px">${labelsHtml}</div>
 </div>`;
 }
 

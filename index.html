@@ -390,6 +390,7 @@
     .plan-card.premium { border-color: #d97706; background: linear-gradient(160deg,#fffbeb,#fef3c7); }
     .plan-card-title { font-size: 12px; font-weight: 800; color: var(--sub); margin-bottom: 8px; }
     .plan-card.premium .plan-card-title { color: #92400e; }
+    .plan-card.premium .plan-feature { color: #451a03; }
     .plan-feature { font-size: 12px; color: var(--text); padding: 3px 0; display: flex; align-items: center; gap: 5px; line-height: 1.4; }
     .upgrade-price { text-align: center; margin-bottom: 14px; }
     .upgrade-price-num { font-size: 30px; font-weight: 900; color: var(--text); }
@@ -3506,6 +3507,9 @@ function setCheckView(mode) {
     }
   }
   renderCheck();
+  if (mode === 'card' && !isMuted && checkList.length > 0) {
+    setTimeout(() => speakWord(checkList[0].en, 'en-US'), 400);
+  }
 }
 function setCheckFilter(mode) {
   if (mode === 'unknown' && !isPremium) {
@@ -4490,7 +4494,17 @@ function renderStats() {
 
 function _setSpcMetric(cardIdx, metric) {
   _statsMetric[cardIdx] = metric;
-  renderStats();
+  const periods = ['day','week','month','year'];
+  const period = periods[cardIdx];
+  const card = document.getElementById('spc-' + period);
+  if (!card) { renderStats(); return; }
+  const map = _statsWordMap();
+  const outer = card.querySelector('.spc-chart-outer');
+  if (outer) outer.innerHTML = _buildSpcChart(map, period, metric);
+  card.querySelectorAll('.spc-ct-btn').forEach(btn => {
+    const isWords = btn.textContent.trim() === '学習単語数';
+    btn.classList.toggle('active', metric === 'words' ? isWords : !isWords);
+  });
 }
 
 function switchMode(mode) {

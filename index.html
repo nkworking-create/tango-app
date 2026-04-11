@@ -610,7 +610,8 @@
     .toast { position: fixed; bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px); left: 50%; transform: translateX(-50%) translateY(16px); background: rgba(0,0,0,.78); color: white; padding: 10px 22px; border-radius: 99px; font-size: 14px; font-weight: 600; z-index: 500; opacity: 0; transition: opacity .2s, transform .2s; white-space: nowrap; font-family: var(--font); pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     /* ── チェッククイズ共通 ── */
-    .cq-wrap { flex:1; display:flex; flex-direction:column; align-items:center; padding:16px 20px 32px; gap:14px; overflow-y:auto; width:100%; box-sizing:border-box; }
+    .cq-wrap { flex:1; display:flex; flex-direction:column; align-items:stretch; overflow:hidden; width:100%; box-sizing:border-box; }
+    .cq-content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; align-items:center; padding:16px 20px 0; gap:14px; box-sizing:border-box; width:100%; }
     .cq-prog-wrap { flex:1; height:5px; background:var(--border); border-radius:99px; overflow:hidden; }
     .cq-prog-bar { height:100%; background:linear-gradient(90deg,#7c3aed,#a855f7); border-radius:99px; transition:width .3s; }
     .cq-counter { font-size:12px; font-weight:700; color:var(--sub); white-space:nowrap; }
@@ -625,7 +626,7 @@
     .cq-choice.correct { background:rgba(4,120,87,.15) !important; border-color:#047857 !important; color:#047857 !important; }
     .cq-choice.wrong { background:rgba(220,38,38,.12) !important; border-color:#dc2626 !important; color:#dc2626 !important; }
     .cq-reveal { font-size:13px; color:#047857; font-weight:700; text-align:center; min-height:18px; }
-    .cq-next-btn { width:100%; padding:14px; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font); display:none; }
+    .cq-next-btn { margin:10px 20px 16px; padding:14px; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font); display:none; width:calc(100% - 40px); box-sizing:border-box; }
     .cq-next-btn.show { display:block; }
     /* 穴埋め */
     .cq-fill-inp { width:100%; padding:14px 16px; background:var(--card); border:2px solid var(--border); border-radius:14px; font-size:18px; font-weight:700; color:var(--text); font-family:var(--font); text-align:center; box-sizing:border-box; outline:none; transition:border-color .15s; }
@@ -3309,21 +3310,23 @@ function _renderCQChoice(body, toolbar) {
   const total = _cq.words.length;
   const choices = _cqChoices(w.ja);
   body.innerHTML = toolbar + `<div class="cq-wrap">
-    <div style="width:100%;display:flex;align-items:center;gap:10px">
-      <div class="cq-prog-wrap"><div class="cq-prog-bar" style="width:${(_cq.idx/total)*100}%"></div></div>
-      <div class="cq-counter">${_cq.idx+1}/${total}</div>
-      <button class="mute-btn ${isMuted?'muted':''}" onclick="toggleMute()" style="flex-shrink:0">${isMuted?lucideIcon('volume-x',18):lucideIcon('volume-2',18)}</button>
+    <div class="cq-content">
+      <div style="width:100%;display:flex;align-items:center;gap:10px">
+        <div class="cq-prog-wrap"><div class="cq-prog-bar" style="width:${(_cq.idx/total)*100}%"></div></div>
+        <div class="cq-counter">${_cq.idx+1}/${total}</div>
+        <button class="mute-btn ${isMuted?'muted':''}" onclick="toggleMute()" style="flex-shrink:0">${isMuted?lucideIcon('volume-x',18):lucideIcon('volume-2',18)}</button>
+      </div>
+      <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
+      <div class="cq-card" style="cursor:pointer" onclick="speakWord('${esc(w.en)}','en-US')">
+        <div class="cq-card-en">${esc(w.en)}</div>
+        ${w.pronunciation ? `<div class="cq-card-pron">${esc(w.pronunciation)}</div>` : ''}
+        <div style="margin-top:10px;font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:4px">${lucideIcon('volume-2',13)} タップで発音</div>
+      </div>
+      <div class="cq-choices">
+        ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQChoice(this)">${esc(c)}</button>`).join('')}
+      </div>
+      <div class="cq-reveal" id="cq-reveal"></div>
     </div>
-    <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
-    <div class="cq-card" style="cursor:pointer" onclick="speakWord('${esc(w.en)}','en-US')">
-      <div class="cq-card-en">${esc(w.en)}</div>
-      ${w.pronunciation ? `<div class="cq-card-pron">${esc(w.pronunciation)}</div>` : ''}
-      <div style="margin-top:10px;font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:4px">${lucideIcon('volume-2',13)} タップで発音</div>
-    </div>
-    <div class="cq-choices">
-      ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQChoice(this)">${esc(c)}</button>`).join('')}
-    </div>
-    <div class="cq-reveal" id="cq-reveal"></div>
     <button class="cq-next-btn" id="cq-next" onclick="nextCQ()">次へ →</button>
   </div>`;
   if (!isMuted) speakWord(w.en, 'en-US');
@@ -3336,20 +3339,22 @@ function _renderCQFill(body, toolbar) {
   const parts = sentence.split('___');
   const choices = _cqEnChoices(w.en);
   body.innerHTML = toolbar + `<div class="cq-wrap">
-    ${_cqProgRow(_cq.idx, total)}
-    <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
-    <div class="cq-card">
-      <div class="cq-card-sub">空欄に入る単語を選んでください</div>
-      <div class="cq-sentence">${esc(parts[0])}<span class="cq-blank" id="cq-blank">___</span>${esc(parts[1] || '')}</div>
+    <div class="cq-content">
+      ${_cqProgRow(_cq.idx, total)}
+      <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
+      <div class="cq-card">
+        <div class="cq-card-sub">空欄に入る単語を選んでください</div>
+        <div class="cq-sentence">${esc(parts[0])}<span class="cq-blank" id="cq-blank">___</span>${esc(parts[1] || '')}</div>
+      </div>
+      <div style="width:100%;display:flex;align-items:center;gap:8px">
+        <div class="cq-fill-hint" id="cq-hint-row" style="${_cqHint ? '' : 'display:none'}">意味のヒント：${esc(w.ja)}</div>
+        <button id="cq-hint-toggle" onclick="toggleCQHint()" style="flex-shrink:0;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;font-family:var(--font);white-space:nowrap">${_cqHint ? 'ヒントを隠す' : 'ヒントを表示'}</button>
+      </div>
+      <div class="cq-choices">
+        ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQFill(this)">${esc(c)}</button>`).join('')}
+      </div>
+      <div class="cq-reveal" id="cq-reveal"></div>
     </div>
-    <div style="width:100%;display:flex;align-items:center;gap:8px">
-      <div class="cq-fill-hint" id="cq-hint-row" style="${_cqHint ? '' : 'display:none'}">意味のヒント：${esc(w.ja)}</div>
-      <button id="cq-hint-toggle" onclick="toggleCQHint()" style="flex-shrink:0;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;font-family:var(--font);white-space:nowrap">${_cqHint ? 'ヒントを隠す' : 'ヒントを表示'}</button>
-    </div>
-    <div class="cq-choices">
-      ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQFill(this)">${esc(c)}</button>`).join('')}
-    </div>
-    <div class="cq-reveal" id="cq-reveal"></div>
     <button class="cq-next-btn" id="cq-next" onclick="nextCQ()">次へ →</button>
   </div>`;
 }
@@ -3359,17 +3364,19 @@ function _renderCQListen(body, toolbar) {
   const total = _cq.words.length;
   const choices = _cqChoices(w.ja);
   body.innerHTML = toolbar + `<div class="cq-wrap">
-    ${_cqProgRow(_cq.idx, total)}
-    <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
-    <div class="cq-card" style="display:flex;flex-direction:column;align-items:center;gap:16px">
-      <div class="cq-card-sub">音声を聞いて日本語を選ぼう</div>
-      <button class="cq-listen-btn" onclick="speakWord('${esc(w.en)}','en-US')">${lucideIcon('volume-2',30)}</button>
-      <div style="font-size:12px;color:var(--sub)">タップで再生</div>
+    <div class="cq-content">
+      ${_cqProgRow(_cq.idx, total)}
+      <div class="cq-score-row">正解 ${_cq.correct} / ${_cq.idx}</div>
+      <div class="cq-card" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div class="cq-card-sub">音声を聞いて日本語を選ぼう</div>
+        <button class="cq-listen-btn" onclick="speakWord('${esc(w.en)}','en-US')">${lucideIcon('volume-2',30)}</button>
+        <div style="font-size:12px;color:var(--sub)">タップで再生</div>
+      </div>
+      <div class="cq-choices">
+        ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQListen(this)">${esc(c)}</button>`).join('')}
+      </div>
+      <div class="cq-reveal" id="cq-reveal"></div>
     </div>
-    <div class="cq-choices">
-      ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQListen(this)">${esc(c)}</button>`).join('')}
-    </div>
-    <div class="cq-reveal" id="cq-reveal"></div>
     <button class="cq-next-btn" id="cq-next" onclick="nextCQ()">次へ →</button>
   </div>`;
   setTimeout(() => speakWord(w.en, 'en-US'), 500);

@@ -2977,7 +2977,7 @@ const _MS_MODES = [
   { id:'listen', icon:'headphones',  color:'#dc2626', name:'リスニング', desc:'音声を聞いて答える' },
 ];
 let _modeSelectId = 'card';
-let _modeSelectView = 'swipe'; // 'swipe' | 'list'
+let _modeSelectView = 'grid'; // 'swipe' | 'list' | 'grid'
 
 function _renderModeSelect(body) {
   _cqSettingsMode = null;
@@ -3017,6 +3017,19 @@ function _renderModeSelect(body) {
         </button>`).join('')}
     </div>`;
 
+  const isGrid = _modeSelectView === 'grid';
+  const gridHtml = `
+    <div style="width:100%;padding:0 16px;box-sizing:border-box;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto;flex:1;min-height:0">
+      ${_MS_MODES.filter(m=>m.id!=='list').map(m => `
+        <button onclick="_pickMode('${m.id}');_goToListPicker()" style="background:linear-gradient(160deg,${m.color}28,${m.color}45);border:1.5px solid ${m.color}55;border-radius:20px;padding:20px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;font-family:var(--font);text-align:left;transition:transform .12s;-webkit-tap-highlight-color:transparent" ontouchstart="this.style.transform='scale(.96)'" ontouchend="this.style.transform=''">
+          <div style="width:44px;height:44px;border-radius:13px;background:${m.color}33;display:flex;align-items:center;justify-content:center">${lucideIcon(m.icon,22,m.color)}</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px">${m.name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.45);font-weight:600;line-height:1.4">${m.desc}</div>
+          </div>
+        </button>`).join('')}
+    </div>`;
+
   body.innerHTML = `<div class="list-picker-screen">
     <div style="width:100%;padding:0 20px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-top:4px">
       <div>
@@ -3024,10 +3037,10 @@ function _renderModeSelect(body) {
         <div class="mode-select-sub" style="margin-top:2px">全${base.length}語 ／ ✗ ${unkCount}語</div>
       </div>
       <button onclick="_toggleModeSelectView()" style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);flex-shrink:0;transition:opacity .15s" title="表示切り替え">
-        ${isSwipe ? lucideIcon('list', 18) : lucideIcon('layout-grid', 18)}
+        ${isGrid ? lucideIcon('layout-list', 18) : lucideIcon('layout-grid', 18)}
       </button>
     </div>
-    ${isSwipe ? swipeHtml : listHtml}
+    ${isGrid ? gridHtml : isSwipe ? swipeHtml : listHtml}
   </div>`;
 
   if (isSwipe) {
@@ -3057,7 +3070,7 @@ function _renderModeSelect(body) {
 }
 
 function _toggleModeSelectView() {
-  _modeSelectView = _modeSelectView === 'swipe' ? 'list' : 'swipe';
+  _modeSelectView = _modeSelectView === 'grid' ? 'swipe' : _modeSelectView === 'swipe' ? 'list' : 'grid';
   _renderModeSelect(document.getElementById('check-body'));
 }
 

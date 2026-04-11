@@ -1994,7 +1994,7 @@ function updateSRSBadge() {
 
 // ── 統計のみ即時更新（重い再描画なし） ──
 function updateHomeStats() {
-  const learnedCount = words.filter(w => w.srs?.lastReview).length;
+  const learnedCount = words.filter(w => w.srs?.level > 0).length;
   const total = document.getElementById('stat-total');
   const learnedEl = document.getElementById('stat-learned');
   if (total) total.textContent = words.length;
@@ -2004,7 +2004,7 @@ function updateHomeStats() {
 
 // ══ ホーム ══
 function renderHome() {
-  const learnedCount = words.filter(w => w.srs?.lastReview).length;
+  const learnedCount = words.filter(w => w.srs?.level > 0).length;
   document.getElementById('stat-total').textContent = words.length;
   document.getElementById('stat-learned').textContent = learnedCount;
   document.getElementById('stat-streak').textContent = updateStreak();

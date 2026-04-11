@@ -2947,6 +2947,7 @@ function addWordToList(en, ja, pron, listId) {
 let _cq = { words: [], idx: 0, correct: 0, answered: false };
 let _cqLimit = localStorage.getItem('tango-cq-limit') || 'all'; // 'all'|'10'
 let _cqRange = localStorage.getItem('tango-cq-range') || 'all'; // 'all'|'new'|'unknown'
+let _cqHint = localStorage.getItem('tango-cq-hint') !== 'false'; // true = show hint
 let _cqSettingsMode = null; // 設定画面表示中のモード
 
 function setCQLimit(v) {
@@ -2958,6 +2959,19 @@ function setCQRange(v) {
   _cqRange = v; localStorage.setItem('tango-cq-range', v);
   if (_cqSettingsMode) _renderCQSettings(_cqSettingsMode);
   else _renderModeSelect(document.getElementById('check-body'));
+}
+function toggleCQHint() {
+  _cqHint = !_cqHint;
+  localStorage.setItem('tango-cq-hint', _cqHint);
+  const hint = document.getElementById('cq-hint-row');
+  const btn = document.getElementById('cq-hint-toggle');
+  if (hint) hint.style.display = _cqHint ? '' : 'none';
+  if (btn) btn.textContent = _cqHint ? 'ヒントを隠す' : 'ヒントを表示';
+}
+function _setCQHintSetting(v) {
+  _cqHint = v;
+  localStorage.setItem('tango-cq-hint', _cqHint);
+  _renderCQSettings(_cqSettingsMode);
 }
 function _getCQWords() {
   let base = [...checkList];
@@ -3258,6 +3272,20 @@ function _renderCQSettings(mode) {
       </div>
     </div>
 
+    ${mode === 'fill' ? `<div style="width:100%">
+      <div class="cqs-section-label">ヒント</div>
+      <div class="cqs-seg">
+        <button class="cqs-seg-btn ${_cqHint?'active':''}" style="--lc:${lc}" onclick="_setCQHintSetting(true)">
+          <div class="cqs-seg-main">あり</div>
+          <div class="cqs-seg-sub">意味を表示</div>
+        </button>
+        <button class="cqs-seg-btn ${!_cqHint?'active':''}" style="--lc:${lc}" onclick="_setCQHintSetting(false)">
+          <div class="cqs-seg-main">なし</div>
+          <div class="cqs-seg-sub">意味を隠す</div>
+        </button>
+      </div>
+    </div>` : ''}
+
     <div class="cqs-preview">この設定で <strong>${previewCount}問</strong> 出題されます</div>
     <button class="list-create-btn" style="width:100%;margin:0" onclick="_startCQWithSettings('${mode}')">スタート →</button>
   </div>`;
@@ -3314,7 +3342,10 @@ function _renderCQFill(body, toolbar) {
       <div class="cq-card-sub">空欄に入る単語を選んでください</div>
       <div class="cq-sentence">${esc(parts[0])}<span class="cq-blank" id="cq-blank">___</span>${esc(parts[1] || '')}</div>
     </div>
-    <div class="cq-fill-hint">意味のヒント：${esc(w.ja)}</div>
+    <div style="width:100%;display:flex;align-items:center;gap:8px">
+      <div class="cq-fill-hint" id="cq-hint-row" style="${_cqHint ? '' : 'display:none'}">意味のヒント：${esc(w.ja)}</div>
+      <button id="cq-hint-toggle" onclick="toggleCQHint()" style="flex-shrink:0;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;font-family:var(--font);white-space:nowrap">${_cqHint ? 'ヒントを隠す' : 'ヒントを表示'}</button>
+    </div>
     <div class="cq-choices">
       ${choices.map(c => `<button class="cq-choice" data-c="${esc(c)}" onclick="answerCQFill(this)">${esc(c)}</button>`).join('')}
     </div>
@@ -3383,9 +3414,13 @@ function answerCQListen(btn) {
     if (b.dataset.c === w.ja) b.classList.add('correct');
     else if (b === btn && !isCorrect) b.classList.add('wrong');
   });
-  const reveal = document.getElementById('cq-reveal');
-  if (!isCorrect && reveal) reveal.textContent = `正解: ${w.ja}（${w.en}）`;
-  document.getElementById('cq-next')?.classList.add('show');
+  if (isCorrect) {
+    setTimeout(() => nextCQ(), 800);
+  } else {
+    const reveal = document.getElementById('cq-reveal');
+    if (reveal) reveal.textContent = `正解: ${w.ja}（${w.en}）`;
+    document.getElementById('cq-next')?.classList.add('show');
+  }
 }
 
 function answerCQFill(btn) {
@@ -3401,9 +3436,13 @@ function answerCQFill(btn) {
   });
   const blank = document.getElementById('cq-blank');
   if (blank) { blank.textContent = correct; blank.style.color = isCorrect ? '#047857' : '#dc2626'; blank.style.borderBottomColor = isCorrect ? '#047857' : '#dc2626'; }
-  const reveal = document.getElementById('cq-reveal');
-  if (!isCorrect && reveal) reveal.textContent = `正解: ${correct}（${_cq.words[_cq.idx].ja}）`;
-  document.getElementById('cq-next')?.classList.add('show');
+  if (isCorrect) {
+    setTimeout(() => nextCQ(), 800);
+  } else {
+    const reveal = document.getElementById('cq-reveal');
+    if (reveal) reveal.textContent = `正解: ${correct}（${_cq.words[_cq.idx].ja}）`;
+    document.getElementById('cq-next')?.classList.add('show');
+  }
 }
 
 function nextCQ() {

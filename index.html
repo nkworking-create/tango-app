@@ -2977,7 +2977,7 @@ const _MS_MODES = [
   { id:'listen', icon:'headphones',  color:'#dc2626', name:'リスニング', desc:'音声を聞いて答える' },
 ];
 let _modeSelectId = 'card';
-let _modeSelectView = 'swipe'; // 'swipe' | 'list' | 'grid'
+let _modeSelectView = localStorage.getItem('tango-mode-view') || 'swipe'; // 'swipe' | 'list' | 'grid'
 
 function _renderModeSelect(body) {
   _cqSettingsMode = null;
@@ -3071,6 +3071,7 @@ function _renderModeSelect(body) {
 
 function _toggleModeSelectView() {
   _modeSelectView = _modeSelectView === 'grid' ? 'swipe' : _modeSelectView === 'swipe' ? 'list' : 'grid';
+  localStorage.setItem('tango-mode-view', _modeSelectView);
   _renderModeSelect(document.getElementById('check-body'));
 }
 

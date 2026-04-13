@@ -3210,6 +3210,7 @@ function _pickList(id) {
 
 function _goToSettings(mode) {
   if (_lpSelectedId) { checkListId = _lpSelectedId; renderCheckListBar(); checkList = getFilteredList(); }
+  if (mode === 'list') { setCheckView('list'); return; }
   _renderCQSettings(mode);
 }
 
@@ -3373,7 +3374,7 @@ function _renderCQListen(body, toolbar) {
     </div>
     <button class="cq-next-btn" id="cq-next" onclick="nextCQ()">次へ →</button>
   </div>`;
-  setTimeout(() => speakWord(w.en, 'en-US'), 500);
+  if (!isMuted) setTimeout(() => speakWord(w.en, 'en-US'), 500);
 }
 
 function _cqJudge(isCorrect) {
@@ -3780,8 +3781,28 @@ function judgeCard(isKnown) {
     checkIndex++; flipped=false; renderCheck();
     if(!isMuted) setTimeout(()=>speakWord(checkList[checkIndex].en,'en-US'),300);
   } else {
-    renderCheck();
+    _endStudySession(checkIndex);
+    _showCardResult();
   }
+}
+
+function _showCardResult() {
+  const body = document.getElementById('check-body');
+  const total = checkList.length;
+  const knownCount = checkList.filter(w => !unknownIds.has(w.id)).length;
+  const pct = Math.round(knownCount / total * 100);
+  const [c1, c2] = pct === 100 ? ['#f59e0b','#fcd34d'] : pct >= 80 ? ['#10b981','#34d399'] : pct >= 60 ? ['#7c3aed','#a855f7'] : ['#f97316','#fb923c'];
+  sfxComplete();
+  body.innerHTML = renderCheckToolbar() + `<div class="cq-wrap">
+    <div class="cq-content" style="justify-content:center">
+      <div style="text-align:center;margin-top:20px">
+        <div style="font-size:72px;font-weight:900;background:linear-gradient(135deg,${c1},${c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">${pct}<span style="font-size:32px">%</span></div>
+        <div style="font-size:14px;color:var(--sub);margin-top:8px;font-weight:700">${knownCount} / ${total} 語を正解</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:16px">学習完了！</div>
+      </div>
+    </div>
+    <button class="cq-next-btn" style="display:block" onclick="setCheckView('card')">もう一度</button>
+  </div>`;
 }
 
 function toggleUnknown(id) {

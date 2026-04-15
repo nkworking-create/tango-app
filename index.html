@@ -1188,6 +1188,9 @@
 
 <script src="recommended-words.js"></script>
 <script>
+// ══ API URL ══
+const API_BASE = window.isNativeApp ? 'https://tango-app.onrender.com' : '';
+
 // ══ アカウント ══
 let currentUser = JSON.parse(localStorage.getItem('tango-account') || 'null');
 
@@ -1231,7 +1234,7 @@ async function doLogin() {
   const errEl = document.getElementById('login-error');
   if (!email || !password) { errEl.textContent = 'メールアドレスとパスワードを入力してください'; errEl.style.display = ''; return; }
   try {
-    const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+    const res = await fetch(`${API_BASE}/api/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.error || 'ログインに失敗しました'; errEl.style.display = ''; return; }
     currentUser = { id: data.userId, name: data.name, email: data.email, token: data.token };
@@ -1251,7 +1254,7 @@ async function doRegister() {
   if (!name || !email || !password) { errEl.textContent = 'すべての項目を入力してください'; errEl.style.display = ''; return; }
   if (password.length < 6) { errEl.textContent = 'パスワードは6文字以上で入力してください'; errEl.style.display = ''; return; }
   try {
-    const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, email, password}) });
+    const res = await fetch(`${API_BASE}/api/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, email, password}) });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.error || '登録に失敗しました'; errEl.style.display = ''; return; }
     currentUser = { id: data.userId, name: data.name, email: data.email, token: data.token };
@@ -1269,7 +1272,7 @@ async function doRegister() {
 async function syncSave() {
   if (!currentUser) return;
   try {
-    const res = await fetch('/api/sync/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: currentUser.token, words, lists }) });
+    const res = await fetch(`${API_BASE}/api/sync/save`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: currentUser.token, words, lists }) });
     if (res.ok) showToast('クラウドに保存しました');
     else { const d = await res.json(); if (d.error === '認証が必要です') { currentUser = null; localStorage.removeItem('tango-account'); renderAccountSettings(); showToast('再ログインが必要です'); } }
   } catch { showToast('保存に失敗しました'); }
@@ -1279,7 +1282,7 @@ async function syncLoad() {
   if (!currentUser) return;
   if (!confirm('クラウドのデータでローカルを上書きします。よろしいですか？')) return;
   try {
-    const res = await fetch(`/api/sync/load?token=${currentUser.token}`);
+    const res = await fetch(`${API_BASE}/api/sync/load?token=${currentUser.token}`);
     if (!res.ok) { const d = await res.json(); if (d.error === '認証が必要です') { currentUser = null; localStorage.removeItem('tango-account'); renderAccountSettings(); showToast('再ログインが必要です'); } return; }
     const data = await res.json();
     words = data.words || [];
@@ -2363,7 +2366,7 @@ async function doSearch() {
 
   // サーバーキャッシュを確認
   try {
-    const cacheRes = await fetch(`/api/word-cache?q=${encodeURIComponent(q)}&ja2en=${ja2en}`);
+    const cacheRes = await fetch(`${API_BASE}/api/word-cache?q=${encodeURIComponent(q)}&ja2en=${ja2en}`);
     const cacheData = await cacheRes.json();
     if (cacheData.hit) {
       renderSearchResult(q, cacheData.data, ja2en);
@@ -2377,7 +2380,7 @@ async function doSearch() {
     : `英語「${q}」の日本語訳を最大6つ、単語・熟語のみで以下のJSON形式のみで返してください（コードブロック・説明・例文不要）。アルファベット1文字の文字名（例：t→ティー）は含めないこと:\n{"pronunciation":"IPA発音記号","meanings":[{"word":"日本語訳","pos":"品詞"}]}`;
 
   try {
-    const res = await fetch('/api/search', {
+    const res = await fetch(`${API_BASE}/api/search`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ prompt })
     });
@@ -2404,7 +2407,7 @@ async function doSearch() {
     renderSearchResult(q, parsed, ja2en);
     vib(20);
     // キャッシュに保存
-    fetch('/api/word-cache', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q, ja2en, data: parsed }) }).catch(()=>{});
+    fetch(`${API_BASE}/api/word-cache`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q, ja2en, data: parsed }) }).catch(()=>{});
   } catch(e) {
     showToast('エラー: ' + e.message);
   } finally {
@@ -2601,7 +2604,7 @@ async function doSearchMulti(terms) {
       // キャッシュ確認
       let parsed = null;
       try {
-        const cr = await fetch(`/api/word-cache?q=${encodeURIComponent(term)}&ja2en=${ja2en}`);
+        const cr = await fetch(`${API_BASE}/api/word-cache?q=${encodeURIComponent(term)}&ja2en=${ja2en}`);
         const cd = await cr.json();
         if (cd.hit) parsed = cd.data;
       } catch {}
@@ -2610,14 +2613,14 @@ async function doSearchMulti(terms) {
         const prompt = ja2en
           ? `日本語「${term}」の英語訳を最大3つ、単語・熟語のみで以下のJSON形式のみで返してください:\n{"meanings":[{"word":"英語訳","pronunciation":"IPA発音記号","pos":"品詞"}]}`
           : `英語「${term}」の日本語訳を最大3つ、単語・熟語のみで以下のJSON形式のみで返してください:\n{"pronunciation":"IPA発音記号","meanings":[{"word":"日本語訳","pos":"品詞"}]}`;
-        const res = await fetch('/api/search', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prompt }) });
+        const res = await fetch(`${API_BASE}/api/search`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prompt }) });
         if (res.ok) {
           const data = await res.json();
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
           const match = text.match(/\{[\s\S]*\}/);
           if (match) {
             parsed = JSON.parse(match[0]);
-            fetch('/api/word-cache', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q: term, ja2en, data: parsed }) }).catch(()=>{});
+            fetch(`${API_BASE}/api/word-cache`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q: term, ja2en, data: parsed }) }).catch(()=>{});
           }
         }
       }
@@ -3881,7 +3884,7 @@ async function loadCommunity() {
   document.getElementById('rank-list').innerHTML = `<div class="loading-msg">${t('loading')}</div>`;
   document.getElementById('rank-more-wrap').innerHTML = '';
   try {
-    const res = await fetch('/api/community');
+    const res = await fetch(`${API_BASE}/api/community`);
     const data = await res.json();
     window._rankingData = data;
     renderRanking(false);
@@ -3938,7 +3941,7 @@ function addFromRanking(en, ja) {
 }
 
 async function submitCommunity(en, ja) {
-  try { await fetch('/api/community', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({en,ja}) }); } catch {}
+  try { await fetch(`${API_BASE}/api/community`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({en,ja}) }); } catch {}
 }
 
 // ── みんなのリスト ──
@@ -3949,7 +3952,7 @@ async function loadCommunityLists() {
   document.getElementById('lists-more-wrap').innerHTML = '';
   renderMyShareArea();
   try {
-    const res = await fetch('/api/lists');
+    const res = await fetch(`${API_BASE}/api/lists`);
     const data = await res.json();
     window._communityListsData = data;
     window._communityListsCache = {};
@@ -4029,7 +4032,7 @@ async function addCommunityList(listId) {
     showToast(`${added}語を追加しました`);
     vib(30);
     // 利用カウントを送信
-    try { await fetch('/api/lists/use', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:listId}) }); } catch {}
+    try { await fetch(`${API_BASE}/api/lists/use`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:listId}) }); } catch {}
   } else {
     showToast('すでにすべて登録済みです');
   }
@@ -4069,7 +4072,7 @@ async function shareMyList(listId) {
   const btn = document.getElementById('sbtn-' + listId);
   if (btn) { btn.textContent = t('sharing'); btn.disabled = true; }
   try {
-    await fetch('/api/lists', {
+    await fetch(`${API_BASE}/api/lists`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ userId, name: list.name, words: listWords, icon: list.icon || 'book-open', color: list.color || '#7c3aed' })
     });

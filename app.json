@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "3a50c92c-3547-4f1d-838d-6ad0109084b3"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.kotanakamura.tangoapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-const CACHE = 'tango-v71';
+const CACHE = 'tango-v72';
 const STATIC = ['/', '/recommended-words.js'];
 
 // インストール時にキャッシュ

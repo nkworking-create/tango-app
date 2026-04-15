@@ -2348,13 +2348,18 @@ async function doSearch() {
       document.getElementById('candidates-section').innerHTML = `<div class="empty-msg"><span class="empty-icon">${lucideIcon('lightbulb',40)}</span>${t('msgOneChar').replace(/\n/g,'<br>')}</div>`;
       btn.disabled = false; btn.innerHTML = t('searchBtnText'); return;
     }
-    // EN→JA: 辞書に存在しない単語はブロック
-    const dictOk = await checkEnglishWordExists(q.trim().split(/\s+/)[0]);
-    if (!dictOk) {
-      document.getElementById('candidates-section').innerHTML = `<div class="empty-msg"><span class="empty-icon">${lucideIcon('search',40)}</span>${t('msgNotFound').replace(/\n/g,'<br>')}</div>`;
-      btn.disabled = false; btn.innerHTML = t('searchBtnText'); return;
+    // EN→JA: 辞書に存在しない単語はブロック（ネイティブアプリではスキップ）
+    if (!window.isNativeApp) {
+      const dictOk = await checkEnglishWordExists(q.trim().split(/\s+/)[0]);
+      if (!dictOk) {
+        document.getElementById('candidates-section').innerHTML = `<div class="empty-msg"><span class="empty-icon">${lucideIcon('search',40)}</span>${t('msgNotFound').replace(/\n/g,'<br>')}</div>`;
+        btn.disabled = false; btn.innerHTML = t('searchBtnText'); return;
+      }
     }
   }
+
+  // ネイティブアプリはローカルAPIが使えないので外部APIを直接使用
+  if (window.isNativeApp) { await doSearchNative(q, ja2en, btn); return; }
 
   // サーバーキャッシュを確認
   try {
@@ -2400,6 +2405,43 @@ async function doSearch() {
     vib(20);
     // キャッシュに保存
     fetch('/api/word-cache', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q, ja2en, data: parsed }) }).catch(()=>{});
+  } catch(e) {
+    showToast('エラー: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = t('searchBtnText');
+  }
+}
+
+// ネイティブアプリ用検索（外部APIを直接使用）
+async function doSearchNative(q, ja2en, btn) {
+  try {
+    let pronunciation = '';
+    let meanings = [];
+    if (!ja2en) {
+      // EN→JA: dictionaryapi.devで発音記号、MyMemoryで日本語訳
+      try {
+        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(q.toLowerCase())}`);
+        if (dictRes.ok) {
+          const dictData = await dictRes.json();
+          pronunciation = dictData[0]?.phonetic || dictData[0]?.phonetics?.find(p => p.text)?.text || '';
+        }
+      } catch {}
+      const transRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=en|ja`);
+      const transData = await transRes.json();
+      const translated = transData.responseData?.translatedText;
+      if (!translated || transData.responseStatus !== 200) throw new Error('翻訳できませんでした');
+      meanings = [{ word: translated, pos: '' }];
+    } else {
+      // JA→EN: MyMemoryで英語訳
+      const transRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=ja|en`);
+      const transData = await transRes.json();
+      const translated = transData.responseData?.translatedText;
+      if (!translated || transData.responseStatus !== 200) throw new Error('翻訳できませんでした');
+      meanings = [{ word: translated, pronunciation: '', pos: '' }];
+    }
+    renderSearchResult(q, { pronunciation, meanings }, ja2en);
+    vib(20);
   } catch(e) {
     showToast('エラー: ' + e.message);
   } finally {

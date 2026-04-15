@@ -16,8 +16,20 @@ const USER_DATA_DIR = path.join(BASE, 'user-data');
 if (!fs.existsSync(USER_DATA_DIR)) fs.mkdirSync(USER_DATA_DIR);
 
 function readConfig() {
-  try { return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); }
-  catch { return { geminiApiKey: '', adminPassword: 'admin1234' }; }
+  try {
+    const file = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    return {
+      geminiApiKey: process.env.GEMINI_API_KEY || file.geminiApiKey || '',
+      adminPassword: process.env.ADMIN_PASSWORD || file.adminPassword || 'admin1234',
+      communityEnabled: file.communityEnabled !== false,
+    };
+  } catch {
+    return {
+      geminiApiKey: process.env.GEMINI_API_KEY || '',
+      adminPassword: process.env.ADMIN_PASSWORD || 'admin1234',
+      communityEnabled: true,
+    };
+  }
 }
 function writeConfig(data) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));

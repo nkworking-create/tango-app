@@ -1,0 +1,6 @@
+node_modules/
+config.json
+users.json
+user-data/
+word-cache.json
+.env

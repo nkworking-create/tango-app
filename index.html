@@ -1157,6 +1157,7 @@
     </div>
     <button class="upgrade-btn" onclick="activatePremium()" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>プレミアムに登録する</button>
     <button class="upgrade-cancel" onclick="closeUpgradeModal()">あとで</button>
+    <button class="upgrade-cancel" onclick="restorePremium()" style="font-size:12px;color:var(--sub);margin-top:4px">購入を復元する</button>
   </div>
 </div>
 
@@ -4273,6 +4274,12 @@ function closePaywallModal() {
   document.getElementById('paywall-modal').classList.remove('open');
 }
 function activatePremium() {
+  if (window.isNativeApp) {
+    // ネイティブアプリはStoreKit経由で購入
+    window.ReactNativeWebView?.postMessage('PURCHASE_PREMIUM');
+    closeUpgradeModal();
+    return;
+  }
   isPremium = true;
   localStorage.setItem('tango-premium', 'true');
   closeUpgradeModal();
@@ -4283,6 +4290,11 @@ function activatePremium() {
   renderRecommendedLists();
   const overlay = document.getElementById('community-lock-overlay');
   if (overlay) overlay.style.display = 'none';
+}
+function restorePremium() {
+  if (window.isNativeApp) {
+    window.ReactNativeWebView?.postMessage('RESTORE_PURCHASES');
+  }
 }
 function cancelPremium() {
   if (!confirm('プレミアムプランを解約しますか？')) return;

@@ -492,6 +492,23 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── アカウント削除 ──
+  if (req.url === '/api/delete-account' && req.method === 'POST') {
+    parseBody(req, (err, body) => {
+      if (err) { res.writeHead(400); res.end(); return; }
+      const userId = verifyToken(body.token);
+      if (!userId) { res.writeHead(401, {'Content-Type':'application/json'}); res.end(JSON.stringify({error:'認証が必要です'})); return; }
+      const users = readUsers();
+      const filtered = users.filter(u => u.id !== userId);
+      writeUsers(filtered);
+      const dataFile = path.join(USER_DATA_DIR, userId + '.json');
+      if (fs.existsSync(dataFile)) fs.unlinkSync(dataFile);
+      res.writeHead(200, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({ ok: true }));
+    });
+    return;
+  }
+
   // ── データ保存（クラウド同期）──
   if (req.url === '/api/sync/save' && req.method === 'POST') {
     parseBody(req, (err, body) => {

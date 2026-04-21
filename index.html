@@ -1206,7 +1206,8 @@ function renderAccountSettings() {
       </div>
       <button class="sync-btn" onclick="syncSave()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>クラウドに保存</button>
       <button class="sync-load-btn" onclick="syncLoad()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>クラウドから読み込む</button>
-      <button class="logout-btn" onclick="doLogout()">ログアウト</button>`;
+      <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+      <button class="logout-btn" style="margin-top:8px;border-color:#fca5a5;color:#ef4444" onclick="doDeleteAccount()">アカウントを削除する</button>`;
   } else {
     el.innerHTML = `
       <div style="font-size:13px;color:var(--sub);margin-bottom:12px;line-height:1.6">ログインするとデータをクラウドに保存し、複数端末で同期できます。</div>
@@ -1299,6 +1300,21 @@ function doLogout() {
   localStorage.removeItem('tango-account');
   renderAccountSettings();
   showToast('ログアウトしました');
+}
+async function doDeleteAccount() {
+  if (!confirm('アカウントを削除しますか？\nこの操作は取り消せません。クラウドのデータもすべて削除されます。')) return;
+  if (!confirm('本当に削除しますか？')) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/delete-account`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: currentUser.token }) });
+    if (res.ok) {
+      currentUser = null;
+      localStorage.removeItem('tango-account');
+      renderAccountSettings();
+      showToast('アカウントを削除しました');
+    } else {
+      showToast('削除に失敗しました');
+    }
+  } catch { showToast('削除に失敗しました'); }
 }
 
 // ══ データ ══

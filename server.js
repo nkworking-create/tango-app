@@ -319,11 +319,11 @@ http.createServer((req, res) => {
         return;
       }
       try {
-        const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
         let result = null;
         let lastErr = null;
         for (const model of models) {
-          for (let attempt = 0; attempt < 2; attempt++) {
+          for (let attempt = 0; attempt < 3; attempt++) {
             const r = await httpsPost(
               `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.geminiApiKey}`,
               { contents: [{ parts: [{ text: body.prompt }] }], generationConfig: { temperature: 0.3 } }
@@ -331,7 +331,7 @@ http.createServer((req, res) => {
             if (r.status === 200) { result = r; break; }
             lastErr = r;
             if (r.status !== 503 && r.status !== 429) break;
-            if (attempt === 0) await new Promise(rs => setTimeout(rs, 800));
+            if (attempt < 2) await new Promise(rs => setTimeout(rs, 600 * (attempt + 1)));
           }
           if (result) break;
         }

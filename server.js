@@ -319,12 +319,25 @@ http.createServer((req, res) => {
         return;
       }
       try {
-        const result = await httpsPost(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${config.geminiApiKey}`,
-          { contents: [{ parts: [{ text: body.prompt }] }], generationConfig: { temperature: 0.3 } }
-        );
-        res.writeHead(result.status, { 'Content-Type': 'application/json' });
-        res.end(result.body);
+        const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+        let result = null;
+        let lastErr = null;
+        for (const model of models) {
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const r = await httpsPost(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.geminiApiKey}`,
+              { contents: [{ parts: [{ text: body.prompt }] }], generationConfig: { temperature: 0.3 } }
+            );
+            if (r.status === 200) { result = r; break; }
+            lastErr = r;
+            if (r.status !== 503 && r.status !== 429) break;
+            if (attempt === 0) await new Promise(rs => setTimeout(rs, 800));
+          }
+          if (result) break;
+        }
+        const final = result || lastErr;
+        res.writeHead(final.status, { 'Content-Type': 'application/json' });
+        res.end(final.body);
       } catch(e) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: e.message }));
